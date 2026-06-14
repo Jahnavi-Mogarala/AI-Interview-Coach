@@ -1,0 +1,246 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Category {
+  DSA
+  CP
+  SQL
+  SYSTEM_DESIGN
+  WEB_DEV
+  AI_ML
+}
+
+enum SubmissionStatus {
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+}
+
+enum InterviewType {
+  DSA
+  HR
+  SYSTEM_DESIGN
+  FULL_STACK
+  AI_ML
+  CORE_CS
+  SQL
+  DOMAIN
+}
+
+enum InterviewMode {
+  TEXT
+  VOICE
+  VIDEO
+}
+
+enum AptitudeCategory {
+  QUANT
+  VERBAL
+  LOGICAL
+}
+
+enum KanbanStage {
+  WISHLIST
+  APPLIED
+  OA
+  INTERVIEW
+  OFFER
+  REJECTED
+}
+
+enum BookmarkType {
+  CODING_PROBLEM
+  DSA_TOPIC
+  MOCK_QUESTION
+  NOTES
+}
+
+enum NotificationType {
+  DEADLINE
+  STREAK
+  INTERVIEW
+  PRACTICE
+  COMPANY
+}
+
+model User {
+  id                 String              @id @default(uuid())
+  email              String              @unique
+  passwordHash       String
+  name               String?
+  role               Role                @default(STUDENT)
+  college            String?
+  year               String?
+  degree             String?
+  domainInterest     String?
+  targetRole         String?
+  preferredLanguages String[]
+  dreamCompanies     String[]
+  skillLevel         String?             @default("BEGINNER")
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  streak             Streak?
+  onboardingProfile  OnboardingProfile?
+  submissions        Submission[]
+  interviews         InterviewSession[]
+  aptitudeAttempts   AptitudeAttempt[]
+  applications       PlacementApplication[]
+  bookmarks          Bookmark[]
+  notes              Note[]
+  notifications      Notification[]
+}
+
+model Streak {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak Int      @default(0)
+  longestStreak Int      @default(0)
+  lastActive    DateTime @default(now())
+}
+
+model OnboardingProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roadmap        String   @db.Text // JSON string representation of Roadmap
+  weeklyGoals    String   @db.Text // JSON string representation of goals
+  studyPlanner   String   @db.Text // JSON string representation of study planner
+  createdAt      DateTime @default(now())
+}
+
+model CodingProblem {
+  id           String       @id @default(uuid())
+  title        String
+  difficulty   Difficulty
+  category     Category
+  description  String       @db.Text
+  testCases    String       @db.Text // JSON list of tests: [{input: "", output: "", isHidden: false}]
+  templateCode String       @db.Text // JSON map: {python: "...", javascript: "...", cpp: "..."}
+  solutionCode String       @db.Text // JSON map: {python: "...", javascript: "..."}
+  hints        String       @db.Text // JSON array of hints
+  createdAt    DateTime     @default(now())
+  submissions  Submission[]
+}
+
+model Submission {
+  id                 String           @id @default(uuid())
+  userId             String
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId          String
+  problem            CodingProblem    @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  language           String
+  code               String           @db.Text
+  status             SubmissionStatus
+  runtime            Float            @default(0.0) // execution time in ms
+  memory             Float            @default(0.0) // memory in KB
+  complexityAnalysis String?          @db.Text      // AI output: {timeComplexity: "O(N)", spaceComplexity: "O(1)"}
+  explanation        String?          @db.Text      // AI explanation of submitted code
+  score              Int              @default(0)
+  createdAt          DateTime         @default(now())
+}
+
+model InterviewSession {
+  id                 String        @id @default(uuid())
+  userId             String
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type               InterviewType
+  mode               InterviewMode
+  status             String        @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED
+  transcript         String        @db.Text // JSON chat history: [{role: "interviewer"/"user", text: "", timestamp: ""}]
+  scoreConfidence    Int           @default(0)
+  scoreCommunication Int           @default(0)
+  scoreLogic         Int           @default(0)
+  scoreOptimization  Int           @default(0)
+  feedback           String?       @db.Text // AI suggestions and comments
+  mistakes           String?       @db.Text // AI spotted coding/logical errors
+  createdAt          DateTime      @default(now())
+}
+
+model AptitudeTest {
+  id          String           @id @default(uuid())
+  title       String
+  category    AptitudeCategory
+  questions   String           @db.Text // JSON list: [{question: "", options: [], answer: "", explanation: ""}]
+  duration    Int              @default(15) // timed duration in minutes
+  createdAt   DateTime         @default(now())
+  attempts    AptitudeAttempt[]
+}
+
+model AptitudeAttempt {
+  id             String       @id @default(uuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  testId         String
+  test           AptitudeTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+  score          Int
+  totalQuestions Int
+  correctAnswers Int
+  timeSpent      Int          // in seconds
+  createdAt      DateTime     @default(now())
+}
+
+model PlacementApplication {
+  id          String      @id @default(uuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     String
+  role        String
+  stage       KanbanStage @default(WISHLIST)
+  dateApplied DateTime    @default(now())
+  lastUpdate  DateTime    @default(now()) @updatedAt
+  salary      String?     @default("TBD")
+  notes       String?     @db.Text
+  createdAt   DateTime    @default(now())
+}
+
+model Bookmark {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        BookmarkType
+  referenceId String
+  title       String
+  createdAt   DateTime     @default(now())
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String   @db.Text
+  folder    String   @default("General")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}

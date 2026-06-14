@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+:root {
+  --background: #030303;
+  --foreground: #f4f4f5;
+  --card: #09090b;
+  --card-foreground: #fafafa;
+  --popover: #09090b;
+  --popover-foreground: #fafafa;
+  --primary: #9b1c1c; /* Crimson Red */
+  --primary-foreground: #fafafa;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #9b1c1c;
+  --accent-foreground: #fafafa;
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fafafa;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #dc2626;
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-geist-sans), Inter, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Custom Utilities for Premium Glassmorphism */
+.glass-panel {
+  background: rgba(9, 9, 11, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel-hover:hover {
+  background: rgba(15, 15, 18, 0.75);
+  border-color: rgba(155, 28, 28, 0.35);
+  box-shadow: 0 8px 30px rgba(155, 28, 28, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Glow red neon effects */
+.glow-red {
+  box-shadow: 0 0 15px rgba(155, 28, 28, 0.35);
+}
+
+.glow-red-text {
+  text-shadow: 0 0 8px rgba(220, 38, 38, 0.6);
+}
+
+/* Premium Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030303;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9b1c1c;
+}
+
+/* Code Heatmap Grid Animations */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; filter: brightness(1.2); }
+}
+
+.pulse-glow {
+  animation: pulseGlow 2s infinite ease-in-out;
+}

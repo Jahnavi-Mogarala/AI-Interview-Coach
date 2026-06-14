@@ -1,0 +1,23 @@
+{
+  "name": "jajo-ai-root",
+  "version": "1.0.0",
+  "description": "JaJo AI Interview Coach & Placement Preparation Platform",
+  "scripts": {
+    "install:backend": "npm install --prefix backend",
+    "install:frontend": "npm install --prefix frontend",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "build:backend": "npm run build --prefix backend",
+    "build:frontend": "npm run build --prefix frontend",
+    "build": "npm run build:backend && npm run build:frontend",
+    "start:backend": "npm run start --prefix backend",
+    "start:frontend": "npm run start --prefix frontend",
+    "prisma:generate": "npm run prisma:generate --prefix backend",
+    "prisma:studio": "npm run prisma:studio --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

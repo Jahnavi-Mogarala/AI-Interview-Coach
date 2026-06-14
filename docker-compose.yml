@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: jajo-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: jajo_ai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: jajo-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgrespassword@postgres-db:5432/jajo_ai?schema=public
+      - JWT_SECRET=jajo_placement_mentor_secret_token_2026_premium
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - postgres-db
+
+  frontend-app:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: jajo-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NEXT_PUBLIC_API_URL=http://localhost:5000
+    depends_on:
+      - backend-api
+
+volumes:
+  postgres_data:
