@@ -8,8 +8,30 @@ An advanced, production-ready **AI Interview Coach & Placement Preparation Platf
 
 - **Brand Name**: **JAJO AI**
 - **Tagline**: *"Your Personal AI Placement Mentor"*
-- **Design System**: Matte-dark theme (`#030303` / `#09090b`) contrasted with Deep Crimson Red highlights (`#8b0000` / `#dc2626`) and silver/platinum metallic gradients.
+- **Design System**: Matte-dark theme (`#030303` / `#09090b`) contrasted with Premium Blue-Green (Teal/Emerald/Cyan) highlights (`#0d9488` / `#10b981` / `#06b6d4`) and silver/platinum metallic gradients.
 - **Components**: Glassmorphism, smooth micro-animations, neon status glows, and real-time responsive analytics.
+
+---
+
+## 🌟 Core Features
+
+- **Interactive IDE Coding Workspace**: 
+  - Complete with local Python & JavaScript compilers.
+  - Features SDE-focused coding problems including popular choices from **Striver's SDE Sheet** (*Set Matrix Zeroes*, *Kadane's Algorithm*, *Reverse Linked List*) with automated test suites and AI debugging.
+- **DSA & Core CS Learning Hub**: 
+  - Educational modules covering Data Structures, DBMS, Operating Systems, and Computer Networks.
+  - Interactive Step-by-Step Visualizers, including a **CPU Queue Scheduler** (Round Robin simulation) and a **Network Encapsulation Stack** layers model.
+  - Flip-card vocabulary memorizers and timed diagnostic timed quizzes.
+- **AI Mock Interview Arena**: 
+  - Simulate real-time technical & HR rounds with text or voice interactive feedback.
+  - Speech synthesis (TTS) & recognition (STT) parsing user pacing, confidence, grammar, and technical mistakes.
+- **ATS Resume Analyzer**: 
+  - Scan PDF resumes against industry standards, outputting immediate keyword analysis, formatting reviews, and optimization scores.
+- **Placement Tracker & Job Kanban**: 
+  - Fully interactive drag-and-drop Kanban tracker keeping logs of job application stages (Wishlist, Applied, OA, Interview, Offer, Rejected).
+- **Secure Email Auth & OTP Recovery**: 
+  - Strict input email validation and 6-character password length checks.
+  - Fully functional secure password recovery cycle verifying email ownership using server-tracked 6-digit OTP codes and `/auth/reset-password`.
 
 ---
 
@@ -105,8 +127,11 @@ To make local evaluation easy without database configuration, the server is equi
 
 | Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :--- |
-| **POST** | `/api/auth/register` | Register new student credentials | No |
-| **POST** | `/api/auth/login` | Login and issue session cookies | No |
+| **POST** | `/api/auth/register` | Register new student credentials (with email check) | No |
+| **POST** | `/api/auth/login` | Login and issue session cookies (with email check) | No |
+| **POST** | `/api/auth/forgot-password` | Request recovery OTP code for password reset | No |
+| **POST** | `/api/auth/verify-otp` | Validate the 6-digit verification code | No |
+| **POST** | `/api/auth/reset-password` | Set new password verifying ownership | No |
 | **GET** | `/api/auth/me` | Fetch active profile and dashboard stats | Yes (JWT) |
 | **POST** | `/api/onboarding` | Submit survey and generate AI roadmap | Yes (JWT) |
 | **GET** | `/api/code/problems` | List LeetCode style problems | Yes (JWT) |
