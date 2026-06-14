@@ -5,7 +5,7 @@
       "routePrefix": "/"
     },
     "backend": {
-      "entrypoint": "backend/src/server.ts",
+      "entrypoint": "backend",
       "routePrefix": "/_/backend"
     }
   }
