@@ -1,4 +1,4 @@
-# 🏆 JAJO AI - Your Personal AI Placement Mentor
+# 🏆 JAJO AI - Your Personal AI Placement Mentor (Latest Release)
 
 An advanced, production-ready **AI Interview Coach & Placement Preparation Platform** designed for students preparing for placements, internships, coding interviews, and technical hiring processes. It merges the capabilities of coding sandboxes (like LeetCode/InterviewBit), AI mock interviews, ATS resume checkers, and job trackers into a single premium interface.
 
