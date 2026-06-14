@@ -2,6 +2,8 @@
 
 An advanced, production-ready **AI Interview Coach & Placement Preparation Platform** designed for students preparing for placements, internships, coding interviews, and technical hiring processes. It merges the capabilities of coding sandboxes (like LeetCode/InterviewBit), AI mock interviews, ATS resume checkers, and job trackers into a single premium interface.
 
+
+WEBSITE DEPLOYED LINK : https://ai-interview-coach-git-main-jahnavi-mogaralas-projects.vercel.app/dashboard
 ---
 
 ## 💎 Branding & Aesthetics
