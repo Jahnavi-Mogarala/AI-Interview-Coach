@@ -72,7 +72,7 @@ export default function CodingPage() {
           setProblems(data);
         }
       } catch {
-        // Fallback mockup problems
+        // Fallback mockup problems (including new Striver SDE sheet problems)
         const offlineProblems: Problem[] = [
           {
             id: 'two-sum',
@@ -88,17 +88,43 @@ export default function CodingPage() {
             hints: JSON.stringify(['Try using a hash map to look up the complement in O(1) time.', 'Iterate through the array and store elements along with their indices.'])
           },
           {
-            id: 'valid-parentheses',
-            title: 'Valid Parentheses',
+            id: 'set-matrix-zeroes',
+            title: 'Set Matrix Zeroes',
+            difficulty: 'MEDIUM',
+            category: 'DSA',
+            description: 'Given an `m x n` integer matrix `matrix`, if an element is `0`, set its entire row and column to `0`\'s.\n\nYou must do it in place.\n\n### Example 1:\n```\nInput: matrix = [[1,1,1],[1,0,1],[1,1,1]]\nOutput: [[1,0,1],[0,0,0],[1,0,1]]\n```',
+            testCases: JSON.stringify([{ input: '[[1,1,1],[1,0,1],[1,1,1]]', output: '[[1,0,1],[0,0,0],[1,0,1]]', isHidden: false }]),
+            templateCode: JSON.stringify({
+              javascript: 'function setZeroes(matrix) {\n  // Write your code here\n  \n}',
+              python: 'class Solution:\n    def setZeroes(self, matrix: List[List[int]]) -> None:\n        # Do not return anything, modify matrix in-place instead.\n        pass'
+            }),
+            hints: JSON.stringify(['Try using the first row and first column of the matrix as marking markers instead of extra memory.', 'Beware of overlapping indices on row 0 and column 0, use a separate boolean flag for row 0.'])
+          },
+          {
+            id: 'kadanes-algorithm',
+            title: 'Kadane\'s Algorithm (Maximum Subarray)',
+            difficulty: 'MEDIUM',
+            category: 'DSA',
+            description: 'Given an integer array `nums`, find the subarray with the largest sum and return its sum.\n\n### Example 1:\n```\nInput: nums = [-2,1,-3,4,-1,2,1,-5,4]\nOutput: 6\nExplanation: The subarray [4,-1,2,1] has the largest sum = 6.\n```',
+            testCases: JSON.stringify([{ input: '[-2,1,-3,4,-1,2,1,-5,4]', output: '6', isHidden: false }]),
+            templateCode: JSON.stringify({
+              javascript: 'function maxSubArray(nums) {\n  // Write your code here\n  \n}',
+              python: 'class Solution:\n    def maxSubArray(self, nums: List[int]) -> int:\n        # Write your code here\n        pass'
+            }),
+            hints: JSON.stringify(['Keep track of the running sum. Reset it to 0 if it goes below 0.', 'At each step, update the global maximum sum seen so far.'])
+          },
+          {
+            id: 'reverse-linked-list',
+            title: 'Reverse Linked List',
             difficulty: 'EASY',
             category: 'DSA',
-            description: 'Given a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.\n\nAn input string is valid if:\n- Open brackets must be closed by the same type of brackets.\n- Open brackets must be closed in the correct order.\n- Every close bracket has a corresponding open bracket of the same type.',
-            testCases: JSON.stringify([{ input: '"()"', output: 'true', isHidden: false }]),
+            description: 'Given the `head` of a singly linked list, reverse the list, and return *the reversed list*.\n\n### Example 1:\n```\nInput: head = [1,2,3,4,5]\nOutput: [5,4,3,2,1]\n```',
+            testCases: JSON.stringify([{ input: '[1,2,3,4,5]', output: '[5,4,3,2,1]', isHidden: false }]),
             templateCode: JSON.stringify({
-              javascript: 'function isValid(s) {\n  // Write your code here\n  \n}',
-              python: 'class Solution:\n    def isValid(self, s: str) -> bool:\n        # Write your code here\n        pass'
+              javascript: 'function reverseList(head) {\n  // Write your code here\n  \n}',
+              python: 'class Solution:\n    def reverseList(self, head: ListNode) -> ListNode:\n        # Write your code here\n        pass'
             }),
-            hints: JSON.stringify(['Use a Stack data structure.', 'Push open brackets onto the stack.'])
+            hints: JSON.stringify(['Use three pointers: prev, curr, and next.', 'Initialize prev as null, curr as head, and iterate re-linking curr.next to prev.'])
           }
         ];
         setProblems(offlineProblems);
@@ -263,13 +289,13 @@ export default function CodingPage() {
                   placeholder="Search problem title or topic..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-red-600 w-56"
+                  className="px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-teal-500 w-56"
                 />
                 
                 <select
                   value={difficultyFilter}
                   onChange={(e) => setDifficultyFilter(e.target.value)}
-                  className="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-red-600 cursor-pointer"
+                  className="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-teal-500 cursor-pointer"
                 >
                   <option value="ALL">All Difficulties</option>
                   <option value="EASY">Easy</option>
@@ -280,7 +306,7 @@ export default function CodingPage() {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-red-600 cursor-pointer"
+                  className="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-teal-500 cursor-pointer"
                 >
                   <option value="ALL">All Categories</option>
                   <option value="DSA">Data Structures</option>
@@ -302,10 +328,10 @@ export default function CodingPage() {
                   <div 
                     key={prob.id} 
                     onClick={() => setSelectedProblem(prob)}
-                    className="p-5 rounded-xl bg-zinc-950/60 border border-zinc-900 hover:border-red-950 hover:bg-zinc-900/40 transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    className="p-5 rounded-xl bg-zinc-950/60 border border-zinc-900 hover:border-teal-950 hover:bg-zinc-900/40 transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                   >
                     <div className="space-y-1">
-                      <h3 className="font-bold text-white text-base hover:text-red-500 transition-colors">{prob.title}</h3>
+                      <h3 className="font-bold text-white text-base hover:text-teal-400 transition-colors">{prob.title}</h3>
                       <div className="flex flex-wrap gap-2 pt-1">
                         <span className={`text-[10px] px-2 py-0.5 rounded-full border ${getDifficultyColor(prob.difficulty)} font-bold`}>
                           {prob.difficulty}
@@ -315,7 +341,7 @@ export default function CodingPage() {
                         </span>
                       </div>
                     </div>
-                    <button className="py-2 px-4 rounded-lg bg-zinc-900 hover:bg-red-950/25 border border-zinc-800 hover:border-red-900 text-xs font-bold text-zinc-300 hover:text-red-500 transition-all flex items-center space-x-1 self-start sm:self-auto cursor-pointer">
+                    <button className="py-2 px-4 rounded-lg bg-zinc-900 hover:bg-teal-950/25 border border-zinc-800 hover:border-teal-900 text-xs font-bold text-zinc-300 hover:text-teal-400 transition-all flex items-center space-x-1 self-start sm:self-auto cursor-pointer">
                       <span>Solve Challenge</span>
                       <ChevronLeft className="w-4 h-4 rotate-180" />
                     </button>
@@ -332,7 +358,7 @@ export default function CodingPage() {
             <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
               <button 
                 onClick={() => setSelectedProblem(null)}
-                className="flex items-center space-x-1 px-3 py-1.5 rounded bg-zinc-900 border border-zinc-850 hover:bg-zinc-800 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                className="flex items-center space-x-1 px-3 py-1.5 rounded bg-zinc-900 border border-zinc-850 hover:bg-zinc-850 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span>Return to Problems</span>
@@ -349,7 +375,7 @@ export default function CodingPage() {
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-red-600 cursor-pointer font-bold"
+                className="px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-teal-500 cursor-pointer font-bold"
               >
                 <option value="python">Python 3</option>
                 <option value="javascript">JavaScript</option>
@@ -367,7 +393,7 @@ export default function CodingPage() {
                   <button 
                     onClick={() => setActiveTab('desc')}
                     className={`py-2 px-4 border-b-2 transition-colors cursor-pointer ${
-                      activeTab === 'desc' ? 'border-red-600 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                      activeTab === 'desc' ? 'border-teal-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
                     Description
@@ -375,7 +401,7 @@ export default function CodingPage() {
                   <button 
                     onClick={() => setActiveTab('hints')}
                     className={`py-2 px-4 border-b-2 transition-colors cursor-pointer ${
-                      activeTab === 'hints' ? 'border-red-600 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                      activeTab === 'hints' ? 'border-teal-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
                     AI Hints
@@ -402,7 +428,7 @@ export default function CodingPage() {
                       {hintIndex < JSON.parse(selectedProblem.hints || '[]').length - 1 && (
                         <button
                           onClick={() => setHintIndex(hintIndex + 1)}
-                          className="py-1.5 px-3 bg-red-950/30 hover:bg-red-950/50 text-red-500 rounded border border-red-950 font-bold transition-all cursor-pointer"
+                          className="py-1.5 px-3 bg-teal-950/30 hover:bg-teal-950/50 text-teal-400 rounded border border-teal-950 font-bold transition-all cursor-pointer"
                         >
                           Next Hint
                         </button>
@@ -440,7 +466,7 @@ export default function CodingPage() {
                     placeholder="Enter arguments/inputs..."
                     value={customInput}
                     onChange={(e) => setCustomInput(e.target.value)}
-                    className="w-full p-2.5 rounded-lg bg-zinc-950 border border-zinc-900 text-xs font-mono text-white focus:outline-none focus:border-red-600"
+                    className="w-full p-2.5 rounded-lg bg-zinc-950 border border-zinc-900 text-xs font-mono text-white focus:outline-none focus:border-teal-500"
                   />
                 </div>
 
@@ -451,14 +477,14 @@ export default function CodingPage() {
                     disabled={runLoading || submitLoading}
                     className="py-2.5 px-4 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-xs font-bold text-zinc-300 transition-all flex items-center space-x-1.5 cursor-pointer"
                   >
-                    <Play className="w-3.5 h-3.5 text-red-500 fill-red-500" />
+                    <Play className="w-3.5 h-3.5 text-teal-400 fill-teal-400" />
                     <span>{runLoading ? 'Running...' : 'Run Code'}</span>
                   </button>
 
                   <button
                     onClick={handleSubmitCode}
                     disabled={runLoading || submitLoading}
-                    className="py-2.5 px-5 rounded-lg bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 text-xs font-bold text-white transition-all glow-red flex items-center space-x-1.5 cursor-pointer"
+                    className="py-2.5 px-5 rounded-lg bg-gradient-to-r from-teal-700 to-emerald-500 hover:from-teal-600 hover:to-emerald-400 text-xs font-bold text-white transition-all glow-teal flex items-center space-x-1.5 cursor-pointer animate-pulse"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>{submitLoading ? 'Evaluating...' : 'Submit Code'}</span>
@@ -470,7 +496,7 @@ export default function CodingPage() {
                   <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-900 space-y-3">
                     <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
                       <span className="text-xs font-bold text-white flex items-center space-x-1">
-                        <TermIcon className="w-4 h-4 text-red-500" />
+                        <TermIcon className="w-4 h-4 text-teal-400" />
                         <span>Execution Results</span>
                       </span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
@@ -509,8 +535,8 @@ export default function CodingPage() {
 
                 {/* AI debugger report */}
                 {aiFeedback && (
-                  <div className="p-4 rounded-xl bg-red-950/10 border border-red-900/30 space-y-3">
-                    <h4 className="text-xs font-bold text-red-500 flex items-center space-x-1">
+                  <div className="p-4 rounded-xl bg-teal-950/10 border border-teal-900/30 space-y-3">
+                    <h4 className="text-xs font-bold text-teal-400 flex items-center space-x-1">
                       <Cpu className="w-4 h-4" />
                       <span>AI Code Assistant Report</span>
                     </h4>

@@ -257,7 +257,7 @@ export default function MockInterview() {
           /* Interview configuration page */
           <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-850 max-w-xl mx-auto space-y-6">
             <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-xl bg-red-950/40 border border-red-900 text-red-500 flex items-center justify-center mx-auto glow-red">
+              <div className="w-12 h-12 rounded-xl bg-teal-950/40 border border-teal-900 text-teal-400 flex items-center justify-center mx-auto glow-teal">
                 <MessageSquare className="w-6 h-6" />
               </div>
               <h3 className="font-extrabold text-lg text-white">Configure Interview Session</h3>
@@ -276,7 +276,7 @@ export default function MockInterview() {
                       onClick={() => setType(t)}
                       className={`py-2 px-3 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                         type === t
-                          ? 'bg-red-800 text-white border-red-600 glow-red'
+                          ? 'bg-teal-800 text-white border-teal-600 glow-teal font-black'
                           : 'bg-zinc-900 border-zinc-800 text-zinc-400'
                       }`}
                     >
@@ -300,7 +300,7 @@ export default function MockInterview() {
                       onClick={() => setMode(m.val)}
                       className={`p-3 rounded-xl text-xs font-bold border text-center transition-all cursor-pointer ${
                         mode === m.val
-                          ? 'bg-red-800 text-white border-red-600 glow-red'
+                          ? 'bg-teal-800 text-white border-teal-600 glow-teal font-black'
                           : 'bg-zinc-900 border-zinc-800 text-zinc-400'
                       }`}
                     >
@@ -311,7 +311,7 @@ export default function MockInterview() {
               </div>
 
               <div className="flex items-start space-x-2 p-3 bg-zinc-900/50 border border-zinc-850 rounded-lg text-[10px] text-zinc-500">
-                <Info className="w-4 h-4 text-red-500 shrink-0" />
+                <Info className="w-4 h-4 text-teal-400 shrink-0" />
                 <p className="leading-normal">
                   In <strong>Voice mode</strong>, the browser reads out questions automatically. Click "Speak Response" (requires microphone permissions) to transcript answers directly. Pacing, tone, and filler words are evaluated.
                 </p>
@@ -319,9 +319,9 @@ export default function MockInterview() {
 
               <button
                 onClick={handleStart}
-                className="w-full py-3 bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 rounded-lg text-sm font-bold text-white transition-all glow-red flex items-center justify-center space-x-2 cursor-pointer"
+                className="w-full py-3 bg-gradient-to-r from-teal-700 to-emerald-500 hover:from-teal-600 hover:to-emerald-400 rounded-lg text-sm font-bold text-white transition-all glow-teal flex items-center justify-center space-x-2 cursor-pointer"
               >
-                <Play className="w-4 h-4 fill-white" />
+                <Play className="w-4 h-4 fill-white animate-pulse" />
                 <span>Initialize AI Interviewer</span>
               </button>
             </div>
@@ -339,7 +339,7 @@ export default function MockInterview() {
                     <div className={`max-w-[75%] p-3.5 rounded-xl border text-xs leading-relaxed ${
                       isInterviewer 
                         ? 'bg-zinc-900 border-zinc-850 text-zinc-200 rounded-tl-none' 
-                        : 'bg-red-950/30 border-red-900/40 text-red-400 rounded-tr-none'
+                        : 'bg-teal-950/30 border-teal-900/40 text-teal-400 rounded-tr-none'
                     }`}>
                       <div className="font-bold font-mono text-[9px] text-zinc-500 mb-1">
                         {isInterviewer ? 'AI INTERVIEWER' : 'CANDIDATE'}
@@ -369,7 +369,7 @@ export default function MockInterview() {
                     onClick={toggleRecording}
                     className={`p-3 rounded-xl border transition-all cursor-pointer ${
                       isRecording 
-                        ? 'bg-red-600 border-red-500 text-white animate-pulse glow-red' 
+                        ? 'bg-teal-600 border-teal-500 text-white animate-pulse glow-teal' 
                         : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
                     }`}
                     title={isRecording ? 'Stop Recording' : 'Speak Response'}
@@ -384,13 +384,13 @@ export default function MockInterview() {
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendResponse()}
-                  className="flex-grow p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-red-600"
+                  className="flex-grow p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-teal-500"
                 />
 
                 <button
                   onClick={handleSendResponse}
                   disabled={loadingMsg || !userInput.trim()}
-                  className="p-3 rounded-xl bg-red-800 hover:bg-red-700 text-white transition-colors cursor-pointer"
+                  className="p-3 rounded-xl bg-teal-700 hover:bg-teal-600 text-white transition-colors cursor-pointer"
                 >
                   <Send className="w-4.5 h-4.5" />
                 </button>
@@ -399,7 +399,7 @@ export default function MockInterview() {
 
             {/* Final Performance Evaluation Drawer */}
             {isFinished && feedback && (
-              <div className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 space-y-6 animate-pulse">
+              <div className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 space-y-6">
                 <div className="border-b border-zinc-900 pb-3 flex justify-between items-center">
                   <span className="text-sm font-extrabold text-white flex items-center space-x-1.5">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500" />
@@ -416,17 +416,17 @@ export default function MockInterview() {
                     { label: 'LOGIC & CRITICAL', val: feedback.scoreLogic },
                     { label: 'OPTIMIZATION', val: feedback.scoreOptimization }
                   ].map((s, idx) => (
-                    <div key={idx} className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-900 text-center">
+                    <div key={idx} className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-900 text-center font-bold">
                       <div className="text-xs font-bold text-zinc-500 mb-1">{s.label}</div>
-                      <div className="text-3xl font-black text-white">{s.val}%</div>
+                      <div className="text-3xl font-black text-teal-400">{s.val}%</div>
                     </div>
                   ))}
                 </div>
 
                 {/* Overall advice text */}
-                <div className="p-4 rounded-xl bg-red-950/10 border border-red-900/30 space-y-2">
-                  <h4 className="text-xs font-bold text-red-500 flex items-center space-x-1">
-                    <Star className="w-4 h-4 fill-red-500" />
+                <div className="p-4 rounded-xl bg-teal-950/10 border border-teal-900/30 space-y-2">
+                  <h4 className="text-xs font-bold text-teal-400 flex items-center space-x-1">
+                    <Star className="w-4 h-4 fill-teal-400 text-teal-400" />
                     <span>Mentor Recommendations</span>
                   </h4>
                   <p className="text-xs text-zinc-300 leading-relaxed italic">{feedback.feedback}</p>
@@ -439,7 +439,7 @@ export default function MockInterview() {
                     <ul className="space-y-1.5">
                       {feedback.mistakes.map((mistake: string, i: number) => (
                         <li key={i} className="text-xs text-zinc-400 flex items-start space-x-2">
-                          <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                          <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                           <span>{mistake}</span>
                         </li>
                       ))}
@@ -449,7 +449,7 @@ export default function MockInterview() {
 
                 <button
                   onClick={() => setInterviewStarted(false)}
-                  className="py-2.5 px-6 bg-red-800 hover:bg-red-700 rounded-lg text-xs font-bold text-white glow-red transition-all cursor-pointer"
+                  className="py-2.5 px-6 bg-teal-700 hover:bg-teal-650 rounded-lg text-xs font-bold text-white glow-teal transition-all cursor-pointer"
                 >
                   Return to Dashboard
                 </button>

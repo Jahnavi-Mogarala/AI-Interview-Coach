@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { register, login, getMe, logout, forgotPassword, verifyOtp } from '../controllers/auth';
+import { register, login, getMe, logout, forgotPassword, verifyOtp, resetPassword } from '../controllers/auth';
 import { saveOnboarding } from '../controllers/onboarding';
 import { getProblems, getProblemById, runCode, submitSolution, getAIExplanation } from '../controllers/code';
 import { startInterview, respondToInterview, getInterviewHistory, getInterviewById } from '../controllers/interview';
@@ -21,6 +21,7 @@ router.post('/auth/logout', logout);
 router.get('/auth/me', authMiddleware, getMe);
 router.post('/auth/forgot-password', forgotPassword);
 router.post('/auth/verify-otp', verifyOtp);
+router.post('/auth/reset-password', resetPassword);
 
 // --- Onboarding ---
 router.post('/onboarding', authMiddleware, saveOnboarding);

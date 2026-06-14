@@ -5,7 +5,7 @@ import Navbar from '../../components/Navbar';
 import { useAuthStore } from '../../store/authStore';
 import { 
   BookOpen, HelpCircle, RefreshCw, Layout, Play, 
-  ArrowRight, Award, Compass, Sparkles, ChevronDown 
+  ArrowRight, Award, Compass, Sparkles, ChevronDown, Plus, Cpu
 } from 'lucide-react';
 
 interface DSATopic {
@@ -24,8 +24,18 @@ export default function DSALearning() {
   // Visualization states
   const [windowLeft, setWindowLeft] = useState(0);
   const [windowRight, setWindowRight] = useState(2);
-  const [stackElements, setStackElements] = useState<number[]>([12, 45, 8]);
-  const [queueElements, setQueueElements] = useState<number[]>([15, 30, 42]);
+  const [stackElements, setStackElements] = useState<string[]>(['12', '45', '8']);
+
+  // CPU Queue Scheduler simulation states
+  const [queueProcesses, setQueueProcesses] = useState<{ id: string; burst: number }[]>([
+    { id: 'P1', burst: 25 },
+    { id: 'P2', burst: 15 },
+    { id: 'P3', burst: 35 }
+  ]);
+  const [cpuProcess, setCpuProcess] = useState<{ id: string; burst: number } | null>(null);
+  const [completedProcesses, setCompletedProcesses] = useState<string[]>([]);
+  const [timeQuantum] = useState(10);
+  const [processCounter, setProcessCounter] = useState(4);
 
   // Flashcards state
   const [flippedIndex, setFlippedIndex] = useState<number | null>(null);
@@ -66,7 +76,7 @@ export default function DSALearning() {
           q: 'Which structure is ideal for parsing parenthesis nested pairs?',
           opts: ['Queue', 'Stack', 'Graph', 'HashMap'],
           a: 'Stack',
-          desc: 'Stacks track nested boundaries cleanly, popping the latest open parenthesise on finding closed pairs.'
+          desc: 'Stacks track nested boundaries cleanly, popping the latest open parenthesis on finding closed pairs.'
         }
       ]
     },
@@ -87,25 +97,130 @@ export default function DSALearning() {
           desc: 'Dynamic Programming requires that subproblems are repeated (overlapping) and optimal subproblem solutions lead to optimal overall solutions (optimal substructure).'
         }
       ]
+    },
+    {
+      id: 'dbms',
+      name: 'Database Management Systems (DBMS)',
+      theory: 'DBMS is software designed to manage databases. Key concepts include ACID properties (Atomicity, Consistency, Isolation, Durability) for transaction integrity, Normalization (1NF, 2NF, 3NF, BCNF) to reduce redundancy, and Indexing (B-Trees, Hash Indexes) to speed up query execution.',
+      visualType: 'array',
+      flashcards: [
+        { front: 'What are ACID properties?', back: 'Atomicity (all or nothing), Consistency (valid state transitions), Isolation (independent concurrent transactions), Durability (persistent changes).' },
+        { front: 'What is the purpose of Normalization?', back: 'To minimize data redundancy and dependency by organizing fields and table relationships.' },
+        { front: 'Why are B+ Trees preferred for database indexes?', back: 'They keep data sorted, allowing logarithmic search, insertions, and deletions. B+ Tree leaves are linked, making range queries extremely fast.' }
+      ],
+      quiz: [
+        {
+          q: 'Which database index structure is most efficient for exact key-value match lookups?',
+          opts: ['Hash Index', 'B+ Tree Index', 'Inverted Index', 'Bitmap Index'],
+          a: 'Hash Index',
+          desc: 'Hash indexes offer O(1) time complexity for exact matches, whereas B+ trees offer O(log N) but excel at range queries.'
+        }
+      ]
+    },
+    {
+      id: 'operating-systems',
+      name: 'Operating Systems (OS)',
+      theory: 'An OS manages hardware, resource allocation, and program execution. Core topics include Process Management (Processes, threads, contexts), CPU Scheduling (Round Robin, FIFO, SJF), Memory Management (Paging, virtual memory), and Deadlocks (Mutual exclusion, hold & wait, no preemption, circular wait).',
+      visualType: 'queue',
+      flashcards: [
+        { front: 'What is a Deadlock?', back: 'A state where a set of processes are blocked because each process is holding a resource and waiting for another resource held by some other process.' },
+        { front: 'What is the difference between a process and a thread?', back: 'A process is an executing program instance with its own memory space, while a thread is a segment of execution within a process sharing the same memory.' },
+        { front: 'What is Virtual Memory?', back: 'A technique that maps developer virtual addresses to physical storage addresses, enabling execution of processes larger than physical RAM.' }
+      ],
+      quiz: [
+        {
+          q: 'Which of the following is NOT one of the Coffman conditions required for a deadlock to occur?',
+          opts: ['Preemption', 'Mutual Exclusion', 'Hold and Wait', 'Circular Wait'],
+          a: 'Preemption',
+          desc: 'No Preemption is required for deadlock; if preemption is allowed, resources can be reclaimed, breaking the deadlock.'
+        }
+      ]
+    },
+    {
+      id: 'computer-networks',
+      name: 'Computer Networks (CN)',
+      theory: 'Computer Networks connect nodes to share resources. Key frameworks include the OSI 7-Layer Model (Physical, Data Link, Network, Transport, Session, Presentation, Application), the TCP 3-Way Handshake (SYN -> SYN-ACK -> ACK) for connection-oriented transport, and DNS (Domain Name System) translating domain names to IP addresses.',
+      visualType: 'stack',
+      flashcards: [
+        { front: 'What happens during the TCP 3-Way Handshake?', back: 'Client sends SYN, Server replies with SYN-ACK, Client sends ACK. Connection is then established.' },
+        { front: 'What is DNS?', back: 'Domain Name System - it maps human-readable domain names (like google.com) to machine IP addresses.' },
+        { front: 'Which layer of the OSI model is responsible for routing packets across networks?', back: 'The Network Layer (Layer 3) handles routing using IP addresses.' }
+      ],
+      quiz: [
+        {
+          q: 'In the OSI model, packet encapsulation occurs as data moves down the stack. Which layer adds the TCP/UDP port headers?',
+          opts: ['Transport Layer', 'Network Layer', 'Data Link Layer', 'Application Layer'],
+          a: 'Transport Layer',
+          desc: 'The Transport Layer (Layer 4) handles end-to-end communication and adds ports, segmenting data.'
+        }
+      ]
     }
   ];
 
+  // Stack operations
   const pushToStack = () => {
-    const newVal = Math.floor(Math.random() * 90) + 10;
-    setStackElements([newVal, ...stackElements].slice(0, 5));
+    if (selectedTopic?.id === 'computer-networks') {
+      const headers = ['Physical Header', 'Ethernet Frame', 'IP Header', 'TCP Port Header', 'HTTP Data'];
+      const nextHeader = headers[Math.min(stackElements.length, headers.length - 1)];
+      setStackElements([nextHeader, ...stackElements].slice(0, 5));
+    } else {
+      const newVal = (Math.floor(Math.random() * 90) + 10).toString();
+      setStackElements([newVal, ...stackElements].slice(0, 5));
+    }
   };
 
   const popFromStack = () => {
     setStackElements(stackElements.slice(1));
   };
 
-  const enqueue = () => {
-    const newVal = Math.floor(Math.random() * 90) + 10;
-    setQueueElements([...queueElements, newVal].slice(0, 5));
+  // CPU Queue Scheduler operations
+  const enqueueProcess = () => {
+    const burst = Math.floor(Math.random() * 40) + 10;
+    const newProc = { id: `P${processCounter}`, burst };
+    setQueueProcesses([...queueProcesses, newProc]);
+    setProcessCounter(processCounter + 1);
   };
 
-  const dequeue = () => {
-    setQueueElements(queueElements.slice(1));
+  const runRoundRobinStep = () => {
+    if (queueProcesses.length === 0 && !cpuProcess) {
+      alert('Ready Queue is empty! Enqueue more processes.');
+      return;
+    }
+
+    let active = cpuProcess;
+    let tempQueue = [...queueProcesses];
+
+    // If no active process in CPU, pull from queue head
+    if (!active) {
+      active = tempQueue[0];
+      tempQueue = tempQueue.slice(1);
+    }
+
+    // Execute step
+    if (active) {
+      if (active.burst > timeQuantum) {
+        // Exceeds quantum, decrement and push to tail
+        const updated = { ...active, burst: active.burst - timeQuantum };
+        setCpuProcess(null);
+        setQueueProcesses([...tempQueue, updated]);
+      } else {
+        // Completes
+        setCompletedProcesses([...completedProcesses, active.id]);
+        setCpuProcess(null);
+        setQueueProcesses(tempQueue);
+      }
+    }
+  };
+
+  const resetQueueSimulator = () => {
+    setQueueProcesses([
+      { id: 'P1', burst: 25 },
+      { id: 'P2', burst: 15 },
+      { id: 'P3', burst: 35 }
+    ]);
+    setCpuProcess(null);
+    setCompletedProcesses([]);
+    setProcessCounter(4);
   };
 
   const handleSelectTopic = (topic: DSATopic) => {
@@ -113,6 +228,14 @@ export default function DSALearning() {
     setFlippedIndex(null);
     setQuizAnswers({});
     setQuizSubmitted(false);
+
+    // Initial Stack defaults for CN
+    if (topic.id === 'computer-networks') {
+      setStackElements(['Ethernet Frame', 'IP Header', 'TCP Port Header']);
+    } else {
+      setStackElements(['12', '45', '8']);
+    }
+    resetQueueSimulator();
   };
 
   return (
@@ -125,8 +248,8 @@ export default function DSALearning() {
         <div className="w-full lg:w-72 shrink-0 space-y-4">
           <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-900">
             <h3 className="font-extrabold text-sm text-white flex items-center space-x-1.5 mb-3">
-              <Compass className="w-4 h-4 text-red-500" />
-              <span>DSA Syllabus Outline</span>
+              <Compass className="w-4 h-4 text-teal-400" />
+              <span>DSA & Core CS Syllabus</span>
             </h3>
             
             <div className="space-y-1">
@@ -138,7 +261,7 @@ export default function DSALearning() {
                     onClick={() => handleSelectTopic(topic)}
                     className={`w-full text-left px-3.5 py-2.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex justify-between items-center ${
                       isSelected
-                        ? 'bg-red-950/40 text-red-500 border-red-950'
+                        ? 'bg-teal-955/40 text-teal-400 border-teal-950 glow-teal'
                         : 'bg-zinc-900/40 border-zinc-900 text-zinc-400 hover:text-white'
                     }`}
                   >
@@ -155,10 +278,10 @@ export default function DSALearning() {
         <div className="flex-grow space-y-6">
           {!selectedTopic ? (
             <div className="glass-panel p-12 rounded-2xl border border-zinc-900 text-center space-y-4 max-w-xl mx-auto my-12">
-              <div className="w-12 h-12 rounded-xl bg-red-950/40 border border-red-900 text-red-500 flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-xl bg-teal-950/40 border border-teal-900 text-teal-400 flex items-center justify-center mx-auto">
                 <BookOpen className="w-6 h-6" />
               </div>
-              <h2 className="font-extrabold text-xl text-white">Choose a DSA Module</h2>
+              <h2 className="font-extrabold text-xl text-white">Choose a Learning Module</h2>
               <p className="text-sm text-zinc-400">
                 Explore theory, watch index pointer step-by-step simulations, flip vocabulary index flashcards, and test comprehension with timed quizzes.
               </p>
@@ -167,9 +290,9 @@ export default function DSALearning() {
             <div className="space-y-6">
               {/* Header */}
               <div className="border-b border-zinc-900 pb-4">
-                <div className="flex items-center space-x-2 text-red-500 text-xs font-mono mb-1">
-                  <Sparkles className="w-3.5 h-3.5 fill-red-500" />
-                  <span>DYNAMICAL DSA COMPANION</span>
+                <div className="flex items-center space-x-2 text-teal-400 text-xs font-mono mb-1">
+                  <Sparkles className="w-3.5 h-3.5 fill-teal-400" />
+                  <span>DYNAMICAL LEARNING COMPANION</span>
                 </div>
                 <h2 className="text-2xl font-black text-white">{selectedTopic.name}</h2>
               </div>
@@ -198,7 +321,7 @@ export default function DSALearning() {
                             key={idx} 
                             className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center font-bold font-mono text-xs border transition-all ${
                               isInWindow
-                                ? 'bg-red-800/80 border-red-500 text-white glow-red'
+                                ? 'bg-teal-800/80 border-teal-500 text-white glow-teal'
                                 : 'bg-zinc-900 border-zinc-800 text-zinc-500'
                             }`}
                           >
@@ -224,7 +347,7 @@ export default function DSALearning() {
                           Left Ptr +
                         </button>
                       </div>
-                      <div className="font-mono text-red-500 text-[10px]">
+                      <div className="font-mono text-teal-400 text-[10px]">
                         Window bounds: [{windowLeft}, {windowRight}] Subarray Sum: {
                           [12, 45, 8, 30, 22, 18, 92, 5].slice(windowLeft, windowRight + 1).reduce((a, b) => a + b, 0)
                         }
@@ -247,19 +370,19 @@ export default function DSALearning() {
                   </div>
                 )}
 
-                {/* Stack LIFO Visualizer */}
+                {/* Stack LIFO / Encapsulation Visualizer */}
                 {selectedTopic.visualType === 'stack' && (
                   <div className="space-y-4">
                     <div className="flex flex-col items-center py-6 bg-black/40 rounded-xl border border-zinc-900 min-h-36 justify-end">
-                      <div className="w-24 border-x border-b border-zinc-800 rounded-b p-1.5 flex flex-col space-y-1.5">
+                      <div className="w-56 border-x border-b border-zinc-800 rounded-b p-1.5 flex flex-col space-y-1.5">
                         {stackElements.length === 0 ? (
                           <div className="text-[10px] text-zinc-600 text-center py-6 font-mono">Stack Empty</div>
                         ) : (
                           stackElements.map((val, idx) => (
                             <div 
                               key={idx} 
-                              className={`py-2 text-center rounded bg-red-950/60 border border-red-900 text-xs font-bold text-red-400 font-mono transition-all ${
-                                idx === 0 ? 'animate-bounce border-red-500 text-white' : ''
+                              className={`py-2 px-1 text-center rounded bg-teal-950/60 border border-teal-900 text-[10px] font-bold text-teal-400 font-mono transition-all ${
+                                idx === 0 ? 'animate-bounce border-teal-500 text-white' : ''
                               }`}
                             >
                               {val} {idx === 0 ? '(TOP)' : ''}
@@ -271,17 +394,101 @@ export default function DSALearning() {
                     <div className="flex justify-center space-x-3 text-xs">
                       <button 
                         onClick={pushToStack}
-                        className="py-1.5 px-4 bg-red-800 hover:bg-red-700 text-white rounded font-bold cursor-pointer"
+                        className="py-1.5 px-4 bg-teal-700 hover:bg-teal-650 text-white rounded font-bold cursor-pointer glow-teal"
                       >
-                        Push Element
+                        {selectedTopic.id === 'computer-networks' ? 'Encapsulate Header' : 'Push Element'}
                       </button>
                       <button 
                         onClick={popFromStack}
                         disabled={stackElements.length === 0}
                         className="py-1.5 px-4 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 rounded font-bold cursor-pointer"
                       >
-                        Pop (LIFO)
+                        {selectedTopic.id === 'computer-networks' ? 'Decapsulate (Pop)' : 'Pop (LIFO)'}
                       </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* CPU Queue Scheduler (Round Robin) Visualizer */}
+                {selectedTopic.visualType === 'queue' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-black/40 rounded-xl border border-zinc-900 min-h-40">
+                      
+                      {/* Ready Queue (FIFO) */}
+                      <div className="border border-zinc-850 p-3 rounded-lg bg-zinc-950/60 space-y-2 flex flex-col justify-between">
+                        <div>
+                          <span className="text-[10px] text-zinc-500 font-bold block mb-1.5 uppercase font-mono">Ready Queue (FIFO)</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {queueProcesses.length === 0 ? (
+                              <div className="text-[10px] text-zinc-650 font-mono py-2">Queue Empty</div>
+                            ) : (
+                              queueProcesses.map((proc, idx) => (
+                                <div key={idx} className="px-2.5 py-1.5 rounded bg-teal-950/50 border border-teal-900 text-[10px] font-mono text-teal-400 font-bold">
+                                  {proc.id} ({proc.burst}ms)
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                        <button 
+                          onClick={enqueueProcess}
+                          className="w-full py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 rounded font-bold text-[10px] flex items-center justify-center space-x-1 cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5 text-teal-400" />
+                          <span>Add Random Process</span>
+                        </button>
+                      </div>
+
+                      {/* CPU Core Execution Slot */}
+                      <div className="border border-zinc-850 p-3 rounded-lg bg-zinc-950/60 flex flex-col justify-between items-center text-center">
+                        <span className="text-[10px] text-zinc-500 font-bold block mb-1 uppercase font-mono w-full text-left">CPU Core Execution</span>
+                        <div className="flex-grow flex flex-col items-center justify-center py-4">
+                          {cpuProcess ? (
+                            <div className="px-5 py-3.5 rounded-xl bg-teal-900/40 border border-teal-500 text-xs font-mono font-black text-white glow-teal animate-pulse">
+                              <Cpu className="w-5 h-5 mx-auto mb-1 text-teal-400" />
+                              {cpuProcess.id} <br />
+                              Burst: {cpuProcess.burst}ms
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-zinc-600 font-mono">Core Idle</span>
+                          )}
+                        </div>
+                        <button 
+                          onClick={runRoundRobinStep}
+                          className="w-full py-1.5 bg-teal-700 hover:bg-teal-650 text-white rounded font-bold text-[10px] flex items-center justify-center space-x-1 cursor-pointer glow-teal"
+                        >
+                          <Play className="w-3.5 h-3.5 fill-white" />
+                          <span>Run Robin Cycle</span>
+                        </button>
+                      </div>
+
+                      {/* Completed Queue */}
+                      <div className="border border-zinc-850 p-3 rounded-lg bg-zinc-950/60 space-y-2 flex flex-col justify-between">
+                        <div>
+                          <span className="text-[10px] text-zinc-500 font-bold block mb-1.5 uppercase font-mono">Completed Tasks</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {completedProcesses.length === 0 ? (
+                              <div className="text-[10px] text-zinc-650 font-mono py-2">None Finished</div>
+                            ) : (
+                              completedProcesses.map((pid, idx) => (
+                                <div key={idx} className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400">
+                                  ✓ {pid}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                        <button 
+                          onClick={resetQueueSimulator}
+                          className="w-full py-1.5 bg-zinc-950 hover:bg-zinc-900 text-zinc-400 border border-zinc-900 rounded font-bold text-[10px] cursor-pointer"
+                        >
+                          Reset Simulation
+                        </button>
+                      </div>
+
+                    </div>
+                    <div className="p-2.5 bg-zinc-900/30 border border-zinc-850 rounded-lg text-[9px] text-zinc-500 leading-relaxed font-mono">
+                      ℹ️ Time Quantum = <strong>{timeQuantum}ms</strong>. Running a cycle pulls the head process into the CPU. If its burst time exceeds {timeQuantum}ms, it spends {timeQuantum}ms executing and is re-queued at the tail of the Ready Queue. Otherwise, it executes to completion.
                     </div>
                   </div>
                 )}
@@ -291,10 +498,10 @@ export default function DSALearning() {
                   <div className="py-6 flex justify-center bg-black/40 rounded-xl border border-zinc-900">
                     <div className="space-y-4 text-center">
                       <div className="flex justify-center space-x-8">
-                        <div className="w-8 h-8 rounded-full bg-red-800 text-white flex items-center justify-center text-xs font-bold font-mono border border-red-600 relative">
+                        <div className="w-8 h-8 rounded-full bg-teal-700 text-white flex items-center justify-center text-xs font-bold font-mono border border-teal-500 relative">
                           R
-                          <div className="absolute -bottom-6 -left-3 w-6 h-0.5 bg-zinc-850 rotate-45" />
-                          <div className="absolute -bottom-6 -right-3 w-6 h-0.5 bg-zinc-850 -rotate-45" />
+                          <div className="absolute -bottom-6 -left-3 w-6 h-0.5 bg-zinc-800 rotate-45" />
+                          <div className="absolute -bottom-6 -right-3 w-6 h-0.5 bg-zinc-800 -rotate-45" />
                         </div>
                       </div>
                       <div className="flex justify-center space-x-12">
@@ -317,9 +524,9 @@ export default function DSALearning() {
                       <div 
                         key={idx}
                         onClick={() => setFlippedIndex(isFlipped ? null : idx)}
-                        className="min-h-24 p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 flex items-center justify-center text-center cursor-pointer hover:border-red-950 transition-all select-none"
+                        className="min-h-24 p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 flex items-center justify-center text-center cursor-pointer hover:border-teal-950 transition-all select-none"
                       >
-                        <p className={`text-xs font-bold ${isFlipped ? 'text-red-400 font-normal italic' : 'text-white'}`}>
+                        <p className={`text-xs font-bold ${isFlipped ? 'text-teal-400 font-normal italic' : 'text-white'}`}>
                           {isFlipped ? card.back : card.front}
                         </p>
                       </div>
@@ -349,7 +556,7 @@ export default function DSALearning() {
                                 onClick={() => setQuizAnswers({ ...quizAnswers, [idx]: opt })}
                                 className={`text-left p-2.5 rounded-lg text-xs border transition-all cursor-pointer ${
                                   isChosen
-                                    ? 'bg-red-950/40 text-red-500 border-red-950 font-semibold'
+                                    ? 'bg-teal-955/40 text-teal-400 border-teal-950 font-semibold glow-teal'
                                     : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
                                 }`}
                               >
@@ -379,7 +586,7 @@ export default function DSALearning() {
                     <button
                       onClick={() => setQuizSubmitted(true)}
                       disabled={Object.keys(quizAnswers).length === 0}
-                      className="py-2 px-5 bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 rounded text-xs font-bold text-white transition-all glow-red disabled:opacity-50 cursor-pointer"
+                      className="py-2 px-5 bg-gradient-to-r from-teal-700 to-emerald-500 hover:from-teal-650 hover:to-emerald-400 rounded text-xs font-bold text-white transition-all glow-teal disabled:opacity-50 cursor-pointer"
                     >
                       Submit Quiz
                     </button>

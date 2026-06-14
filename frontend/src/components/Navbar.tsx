@@ -38,12 +38,12 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/dashboard" className="flex items-center space-x-2 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-800 to-red-600 flex items-center justify-center glow-red font-black text-white text-lg tracking-wider">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-700 to-emerald-500 flex items-center justify-center glow-teal font-black text-white text-lg tracking-wider">
             J
           </div>
           <div>
-            <span className="font-extrabold text-xl tracking-tight text-white group-hover:text-red-500 transition-colors">
-              JAJO <span className="text-red-600 glow-red-text">AI</span>
+            <span className="font-extrabold text-xl tracking-tight text-white group-hover:text-teal-400 transition-colors">
+              JAJO <span className="text-teal-500 glow-teal-text">AI</span>
             </span>
             <p className="text-[9px] text-zinc-500 font-mono tracking-widest uppercase">Placement Mentor</p>
           </div>
@@ -60,7 +60,7 @@ export default function Navbar() {
                 href={item.path}
                 className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? 'bg-red-950/40 text-red-500 border border-red-900/30'
+                    ? 'bg-teal-950/40 text-teal-400 border border-teal-900/30'
                     : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
                 }`}
               >
@@ -87,7 +87,7 @@ export default function Navbar() {
             >
               <Bell className="w-4.5 h-4.5" />
               {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full glow-red" />
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-teal-500 rounded-full glow-teal" />
               )}
             </button>
 
@@ -95,7 +95,7 @@ export default function Navbar() {
               <div className="absolute right-0 mt-2 w-80 rounded-xl bg-zinc-950 border border-zinc-800 shadow-2xl p-4 z-50">
                 <div className="flex justify-between items-center mb-3">
                   <h4 className="font-bold text-sm text-white">Live notifications</h4>
-                  <button onClick={clearNotifications} className="text-xs text-red-500 hover:underline">
+                  <button onClick={clearNotifications} className="text-xs text-teal-400 hover:underline">
                     Clear all
                   </button>
                 </div>
@@ -120,7 +120,7 @@ export default function Navbar() {
           {user.role === 'ADMIN' && (
             <Link
               href="/admin"
-              className="p-2 rounded-lg bg-red-950/20 border border-red-950 text-red-500 hover:bg-red-950/40 text-xs font-bold"
+              className="p-2 rounded-lg bg-teal-950/20 border border-teal-950 text-teal-400 hover:bg-teal-950/40 text-xs font-bold"
             >
               Admin Panel
             </Link>
@@ -129,7 +129,7 @@ export default function Navbar() {
           {/* Logout Trigger */}
           <button
             onClick={handleLogout}
-            className="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-red-950/20 hover:border-red-900/30 transition-all text-sm"
+            className="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-teal-950/20 hover:border-teal-900/30 transition-all text-sm"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>
@@ -157,7 +157,7 @@ export default function Navbar() {
                 href={item.path}
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center space-x-2.5 px-3 py-2.5 rounded-lg text-sm font-medium ${
-                  isActive ? 'bg-red-950/40 text-red-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                  isActive ? 'bg-teal-950/40 text-teal-400' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -167,7 +167,7 @@ export default function Navbar() {
           })}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-950/20 text-left font-semibold"
+            className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-lg text-sm text-teal-400 hover:bg-teal-950/20 text-left font-semibold"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>

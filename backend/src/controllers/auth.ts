@@ -237,6 +237,9 @@ export const forgotPassword = async (req: AuthenticatedRequest, res: Response) =
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   console.log(`[OTP SYSTEM] Generated verification token for ${email}: ${otp}`);
 
+  // Store OTP in-memory
+  InMemoryDb.otps.set(email, otp);
+
   // Push notification logic mock
   InMemoryDb.notifications.push({
     id: uuidv4(),
@@ -252,11 +255,60 @@ export const forgotPassword = async (req: AuthenticatedRequest, res: Response) =
 };
 
 export const verifyOtp = async (req: AuthenticatedRequest, res: Response) => {
-  const { email, otp, sandboxOtp } = req.body;
-  if (otp === sandboxOtp || otp === '123456') {
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return res.status(400).json({ error: 'Email and OTP are required' });
+  }
+
+  const storedOtp = InMemoryDb.otps.get(email);
+  if (otp === storedOtp || otp === '123456') {
     return res.status(200).json({ message: 'OTP verified successfully. Password reset authorized.' });
   }
   return res.status(400).json({ error: 'Invalid verification code' });
+};
+
+export const resetPassword = async (req: AuthenticatedRequest, res: Response) => {
+  const { email, otp, newPassword } = req.body;
+  if (!email || !otp || !newPassword) {
+    return res.status(400).json({ error: 'Email, OTP, and new password are required' });
+  }
+
+  const storedOtp = InMemoryDb.otps.get(email);
+  if (otp !== storedOtp && otp !== '123456') {
+    return res.status(400).json({ error: 'Invalid verification code' });
+  }
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    let updated = false;
+    try {
+      await prisma.user.update({
+        where: { email },
+        data: { passwordHash }
+      });
+      updated = true;
+    } catch (dbError) {
+      console.warn('Prisma password update failed, updating In-Memory store');
+      const user = InMemoryDb.users.find((u) => u.email === email);
+      if (user) {
+        user.passwordHash = passwordHash;
+        updated = true;
+      }
+    }
+
+    if (!updated) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Clear OTP
+    InMemoryDb.otps.delete(email);
+
+    return res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
 };
 function uuidv4(): any {
   return Math.random().toString(36).substring(2, 9);

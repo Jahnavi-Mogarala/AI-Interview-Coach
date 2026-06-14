@@ -16,11 +16,13 @@ export default function LandingPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // OTP State
+  // OTP & Password Reset State
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpVal, setOtpVal] = useState('');
   const [serverOtp, setServerOtp] = useState('');
   const [otpStatus, setOtpStatus] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [otpStep, setOtpStep] = useState<'verify' | 'reset'>('verify');
 
   // If already logged in, go straight to dashboard
   useEffect(() => {
@@ -32,6 +34,19 @@ export default function LandingPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validations
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     setLoading(true);
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
@@ -93,6 +108,11 @@ export default function LandingPage() {
       return;
     }
     setOtpStatus('Requesting...');
+    setOtpStep('verify');
+    setOtpVal('');
+    setNewPassword('');
+    setShowOtpModal(true);
+
     try {
       const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const res = await fetch(`${backendUrl}/api/auth/forgot-password`, {
@@ -104,7 +124,6 @@ export default function LandingPage() {
       if (res.ok) {
         setServerOtp(data.sandboxOtp);
         setOtpStatus(`Code simulated: ${data.sandboxOtp}. Type it below.`);
-        setShowOtpModal(true);
       } else {
         setOtpStatus('Failed: ' + data.error);
       }
@@ -113,42 +132,93 @@ export default function LandingPage() {
       const offlineOtp = Math.floor(100000 + Math.random() * 900000).toString();
       setServerOtp(offlineOtp);
       setOtpStatus(`[Offline Mode] Code simulated: ${offlineOtp}. Type it below.`);
-      setShowOtpModal(true);
     }
   };
 
   // Verify OTP
-  const handleVerifyOtp = () => {
-    if (otpVal === serverOtp || otpVal === '123456') {
+  const handleVerifyOtp = async () => {
+    if (!otpVal) {
+      alert('Please enter the OTP code');
+      return;
+    }
+    setOtpStatus('Verifying...');
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${backendUrl}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp: otpVal })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setOtpStep('reset');
+        setOtpStatus('OTP Verified! Enter your new password.');
+      } else {
+        setOtpStatus('Failed: ' + (data.error || 'Invalid OTP code'));
+      }
+    } catch {
+      // Offline verification fallback
+      if (otpVal === serverOtp || otpVal === '123456') {
+        setOtpStep('reset');
+        setOtpStatus('[Offline] OTP Verified! Enter your new password.');
+      } else {
+        setOtpStatus('Invalid verification code. Try again.');
+      }
+    }
+  };
+
+  // Reset Password Action
+  const handleResetPassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      alert('Password must be at least 6 characters long');
+      return;
+    }
+    setOtpStatus('Resetting password...');
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${backendUrl}/api/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp: otpVal, newPassword })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setShowOtpModal(false);
+        setOtpVal('');
+        setNewPassword('');
+        alert('Password reset successfully! You can now log in with your new password.');
+      } else {
+        setOtpStatus('Failed: ' + (data.error || 'Password reset failed'));
+      }
+    } catch {
+      // Offline reset simulation fallback
       setShowOtpModal(false);
       setOtpVal('');
-      setError('');
-      alert('OTP Verified! Running Sandbox login.');
+      setNewPassword('');
+      alert('[Offline] Password reset simulated successfully! Log in via Sandbox or reload.');
       handleSandboxLogin();
-    } else {
-      alert('Invalid OTP code. Try again.');
     }
   };
 
   return (
     <div className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-between">
-      {/* Decorative Radial Crimson Gradients */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-red-950/25 blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-red-950/20 blur-[160px] pointer-events-none" />
+      {/* Decorative Radial Teal/Emerald Gradients */}
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-teal-950/25 blur-[160px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-teal-950/20 blur-[160px] pointer-events-none" />
 
       {/* Main hero grid */}
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 lg:py-20 flex-grow flex flex-col lg:flex-row items-center justify-between gap-12 relative z-10">
         
         {/* Left column: Branding & Copy */}
         <div className="flex-1 text-center lg:text-left space-y-6 max-w-2xl">
-          <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-red-500 font-mono text-xs">
-            <Sparkles className="w-3.5 h-3.5 fill-red-500 animate-spin" />
+          <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-teal-400 font-mono text-xs">
+            <Sparkles className="w-3.5 h-3.5 fill-teal-400 text-teal-400 animate-spin" />
             <span>JAJO AI VERSION 2.0 IS LIVE</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-[1.05]">
             Your Personal AI <br />
-            <span className="bg-gradient-to-r from-red-600 via-red-500 to-zinc-400 bg-clip-text text-transparent glow-red-text">
+            <span className="bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent glow-teal-text">
               Placement Mentor
             </span>
           </h1>
@@ -166,7 +236,7 @@ export default function LandingPage() {
               { icon: Award, label: "Quantitative Aptitude" }
             ].map((p, i) => (
               <div key={i} className="flex items-center space-x-2.5 text-zinc-300">
-                <div className="w-7 h-7 rounded-lg bg-zinc-900/80 border border-zinc-800 flex items-center justify-center text-red-500">
+                <div className="w-7 h-7 rounded-lg bg-zinc-900/80 border border-zinc-800 flex items-center justify-center text-teal-400">
                   <p.icon className="w-4 h-4" />
                 </div>
                 <span className="text-sm font-medium">{p.label}</span>
@@ -175,7 +245,7 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center space-x-2 text-zinc-500 text-xs font-mono pt-4 justify-center lg:justify-start">
-            <Shield className="w-3.5 h-3.5 text-red-500" />
+            <Shield className="w-3.5 h-3.5 text-teal-400" />
             <span>Production ready JWT sessions & Persistent DB Sync active</span>
           </div>
         </div>
@@ -193,7 +263,7 @@ export default function LandingPage() {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-950/30 border border-red-900/40 text-red-400 text-xs font-medium">
+              <div className="mb-4 p-3 rounded-lg bg-teal-950/30 border border-teal-900/40 text-teal-400 text-xs font-medium">
                 {error}
               </div>
             )}
@@ -208,7 +278,7 @@ export default function LandingPage() {
                     placeholder="Enter your name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-red-600 transition-colors"
+                    className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
                   />
                 </div>
               )}
@@ -221,7 +291,7 @@ export default function LandingPage() {
                   placeholder="student@jajo.ai"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
                 />
               </div>
 
@@ -232,7 +302,7 @@ export default function LandingPage() {
                     <button
                       type="button"
                       onClick={handleRequestOtp}
-                      className="text-[11px] text-red-500 hover:underline focus:outline-none"
+                      className="text-[11px] text-teal-400 hover:underline focus:outline-none"
                     >
                       Forgot? Request OTP
                     </button>
@@ -244,14 +314,14 @@ export default function LandingPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 px-4 mt-2 rounded-lg bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 text-sm font-bold text-white transition-all glow-red flex items-center justify-center space-x-2 cursor-pointer"
+                className="w-full py-3 px-4 mt-2 rounded-lg bg-gradient-to-r from-teal-700 to-emerald-500 hover:from-teal-600 hover:to-emerald-400 text-sm font-bold text-white transition-all glow-teal flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <span>{loading ? 'Authenticating...' : isLogin ? 'Sign In' : 'Create Account'}</span>
                 {!loading && <ArrowRight className="w-4 h-4" />}
@@ -271,9 +341,9 @@ export default function LandingPage() {
             {/* Sandbox Quick Access */}
             <button
               onClick={handleSandboxLogin}
-              className="w-full py-2.5 px-4 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800/80 hover:border-zinc-700 text-xs font-bold text-zinc-300 transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+              className="w-full py-2.5 px-4 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-850 hover:border-zinc-700 text-xs font-bold text-zinc-300 transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
             >
-              <Activity className="w-4 h-4 text-red-500" />
+              <Activity className="w-4 h-4 text-teal-400" />
               <span>Launch instant Sandbox Mode</span>
             </button>
 
@@ -294,29 +364,59 @@ export default function LandingPage() {
       {showOtpModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="glass-panel p-6 rounded-xl max-w-sm w-full border border-zinc-800 text-center space-y-4">
-            <h3 className="font-extrabold text-lg text-white">Enter recovery OTP</h3>
-            <p className="text-xs text-zinc-400">{otpStatus}</p>
-            <input
-              type="text"
-              placeholder="Enter 6-digit OTP code"
-              value={otpVal}
-              onChange={(e) => setOtpVal(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-center text-white tracking-widest font-mono focus:outline-none focus:border-red-600"
-            />
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setShowOtpModal(false)}
-                className="flex-1 py-2 px-3 bg-zinc-900 rounded-lg text-xs font-semibold hover:bg-zinc-800 text-zinc-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleVerifyOtp}
-                className="flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 rounded-lg text-xs font-bold text-white glow-red"
-              >
-                Verify & login
-              </button>
-            </div>
+            {otpStep === 'verify' ? (
+              <>
+                <h3 className="font-extrabold text-lg text-white">Enter recovery OTP</h3>
+                <p className="text-xs text-zinc-400">{otpStatus}</p>
+                <input
+                  type="text"
+                  placeholder="Enter 6-digit OTP code"
+                  value={otpVal}
+                  onChange={(e) => setOtpVal(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-center text-white tracking-widest font-mono focus:outline-none focus:border-teal-500"
+                />
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setShowOtpModal(false)}
+                    className="flex-1 py-2 px-3 bg-zinc-900 rounded-lg text-xs font-semibold hover:bg-zinc-850 text-zinc-400"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleVerifyOtp}
+                    className="flex-1 py-2 px-3 bg-teal-600 hover:bg-teal-500 rounded-lg text-xs font-bold text-white glow-teal"
+                  >
+                    Verify Code
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="font-extrabold text-lg text-white">Choose New Password</h3>
+                <p className="text-xs text-teal-400">{otpStatus}</p>
+                <input
+                  type="password"
+                  placeholder="Enter at least 6 characters"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-center text-white focus:outline-none focus:border-teal-500"
+                />
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setShowOtpModal(false)}
+                    className="flex-1 py-2 px-3 bg-zinc-900 rounded-lg text-xs font-semibold hover:bg-zinc-850 text-zinc-400"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleResetPassword}
+                    className="flex-1 py-2 px-3 bg-teal-600 hover:bg-teal-500 rounded-lg text-xs font-bold text-white glow-teal"
+                  >
+                    Reset Password
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
