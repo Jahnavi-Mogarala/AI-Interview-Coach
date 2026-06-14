@@ -4,6 +4,10 @@ An advanced, production-ready **AI Interview Coach & Placement Preparation Platf
 
 
 WEBSITE DEPLOYED LINK : https://ai-interview-coach-git-main-jahnavi-mogaralas-projects.vercel.app/dashboard
+
+https://ai-interview-coach-git-main-jahnavi-mogaralas-projects.vercel.app/
+
+
 ---
 
 ## 💎 Branding & Aesthetics
